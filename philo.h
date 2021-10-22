@@ -2,6 +2,8 @@
 # define PHILO_H
 
 # include <stdio.h>
+# include <unistd.h>
+# include <stdlib.h>
 
 typedef struct	s_box
 {
@@ -9,7 +11,7 @@ typedef struct	s_box
     int time_to_die;
 	int	time_to_eat;
 	int time_to_sleep;
-	int	meals_count[philos];
+	int	meals;
 }   t_box;
 
 #endif

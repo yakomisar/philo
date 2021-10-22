@@ -31,7 +31,8 @@ long int	ft_atoi(const char *str)
 void	get_error(t_box *box)
 {
 	write(2, "Error\n", 6);
-	free(box);
+	if (box)
+		free(box);
 	exit(0);
 }
 
@@ -58,12 +59,23 @@ void	init_box(int i, int value, t_box *box)
 {
 	if (i == 1)
 		box->philos = value;
-	if (i == 2)
+	else if (i == 2)
 		box->time_to_die = value;
-	if (i == 3)
+	else if (i == 3)
 		box->time_to_eat = value;
-	if (i == 4)
+	else if (i == 4)
 		box->time_to_sleep = value;
+	else if (i == 5)
+		box->meals = value;	
+}
+
+void	printf_values(t_box *box)
+{
+	printf("philos: %d\n", box->philos);
+    printf("time to die: %d\n", box->time_to_die);
+	printf("time to eat: %d\n", box->time_to_eat);
+	printf("time to sleep: %d\n", box->time_to_sleep);
+	printf("meals: %d\n", box->meals);
 }
 
 void	check_errors(int argc, char **argv, t_box *box)
@@ -86,20 +98,17 @@ void	check_errors(int argc, char **argv, t_box *box)
 		init_box(i, value, box);
 		i++;
 	}
-	if (i == 5)
-		init_meals(argv[i], box);
+	printf_values(box);
 }
 
 int	main(int argc, char **argv)
 {
 	t_box	*box;
 
-    if	(argc == 6)
+    if (argc == 6)
 	{
 		box = (t_box *)malloc(sizeof(t_box));
         check_errors(argc, argv, box);
     }
     return (0);
 }
-
-
