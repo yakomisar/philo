@@ -1,60 +1,5 @@
 #include "philo.h"
 
-long int	ft_atoi(const char *str)
-{
-	char		*s;
-	long int	result;
-	int			i;
-	short int	sign;
-
-	i = 0;
-	sign = 1;
-	result = 0;
-	s = (char *)str;
-	while (s[i] == '\t' || s[i] == '\r' || s[i] == '\n'
-		   || s[i] == ' ' || s[i] == '\f' || s[i] == '\v')
-		i++;
-	if (s[i] == '-' || s[i] == '+')
-	{	
-		if (s[i] == '-')
-			sign *= -1;
-		i++;
-	}
-	while (s[i] >= '0' && s[i] <= '9')
-	{
-		result = (result * 10) + (s[i] - '0');
-		i++;
-	}
-	return (result * sign);
-}
-
-void	get_error(t_box *box)
-{
-	write(2, "Error\n", 6);
-	if (box)
-		free(box);
-	exit(0);
-}
-
-int	ft_isdigit(int c)
-{
-	return (c >= 48 && c <= 57);
-}
-
-int	ft_ischar(char *str)
-{
-	int	a;
-
-	a = 0;
-	while (str[a] != '\0')
-	{
-		if (!ft_isdigit(str[a]) || str[a] != '-' || str[a] != '+')
-			return (1);
-		a++;
-	}
-	return (0);
-}
-
 void	init_box(int i, int value, t_box *box)
 {
 	if (i == 1)
@@ -78,27 +23,59 @@ void	printf_values(t_box *box)
 	printf("meals: %d\n", box->meals);
 }
 
-void	check_errors(int argc, char **argv, t_box *box)
+void	eat(int i)
 {
-	int			i;
-	long int	value;
+	printf("Philos #%d is eating\n", i);
+}
 
-	i = 1;
-	while (i < argc)
+void	*launch(void *box)
+{
+	pthread_mutex_lock(&left_fork);
+	pthread_mutex_lock(&right_fork);
+	eat(((t_box *)box)->philos);
+	return NULL;
+}
+
+int	*fill_array(int *arr, int len)
+{
+	int	i;
+
+	i = 0;
+	while (i < len)
 	{
-		value = ft_atoi(argv[i]);
-		if (value > 2147483647 || value < -2147483648)
-			get_error(box);
-		if (value < 0)
-			get_error(box);
-		else if (!ft_isdigit(*argv[i]))
-			get_error(box);
-		if (!ft_ischar(argv[i]))
-			get_error(box);
-		init_box(i, value, box);
+		arr[i] = i;
 		i++;
 	}
-	printf_values(box);
+	return (arr);
+}
+
+void	print_array(int *arr, int len)
+{
+	int i;
+
+	i = 0;
+	while (i < len)
+	{	
+		printf("#%d value in arr: %d\n", i,arr[i]);
+		i++;
+	}
+}
+
+void	ft_start(t_box *box)
+{
+	pthread_t t1, t2;
+	int	*philos;
+
+	philos = (int *)malloc(sizeof(int) * box->philos);
+	philos = fill_array(philos, box->philos);
+	print_array(philos, box->philos);
+	exit(0);
+	pthread_create(&t1, NULL, launch, (void *)philos);
+	pthread_create(&t2, NULL, launch, (void *)philos);
+
+	pthread_join(t1, NULL);
+	pthread_join(t2, NULL);
+	//free(philos);
 }
 
 int	main(int argc, char **argv)
@@ -109,6 +86,7 @@ int	main(int argc, char **argv)
 	{
 		box = (t_box *)malloc(sizeof(t_box));
         check_errors(argc, argv, box);
+		ft_start(box);
     }
     return (0);
 }

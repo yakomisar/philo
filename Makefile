@@ -4,7 +4,8 @@ CC = gcc
 CFLAGS = -Wall -Wextra -Werror
 RM = rm -f
 
-SRC_S		= philo.c
+SRC_S		= philo.c \
+				errors.c
 HEADER		= philo.h
 MAKEFILE	= Makefile
 
