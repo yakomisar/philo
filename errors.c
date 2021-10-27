@@ -28,7 +28,7 @@ long int	ft_atoi(const char *str)
 	return (result * sign);
 }
 
-void	get_error(t_box *box)
+void	get_error(t_waiter *box)
 {
 	write(2, "Error\n", 6);
 	if (box)
@@ -55,7 +55,7 @@ int	ft_ischar(char *str)
 	return (0);
 }
 
-void	check_errors(int argc, char **argv, t_box *box)
+void	check_errors(int argc, char **argv, t_waiter *box)
 {
 	int			i;
 	long int	value;

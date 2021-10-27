@@ -1,6 +1,6 @@
 #include "philo.h"
 
-void	init_box(int i, int value, t_box *box)
+void	init_box(int i, int value, t_waiter *box)
 {
 	if (i == 1)
 		box->philos = value;
@@ -14,7 +14,7 @@ void	init_box(int i, int value, t_box *box)
 		box->meals = value;	
 }
 
-void	printf_values(t_box *box)
+void	printf_values(t_waiter *box)
 {
 	printf("philos: %d\n", box->philos);
     printf("time to die: %d\n", box->time_to_die);
@@ -23,16 +23,16 @@ void	printf_values(t_box *box)
 	printf("meals: %d\n", box->meals);
 }
 
-void	eat(int i)
+void	eat()
 {
-	printf("Philos #%d is eating\n", i);
+	printf("Philos is thinking\n");
+	printf("Philos is eating\n");
 }
 
-void	*launch(void *box)
+void	*launch()
 {
-	pthread_mutex_lock(&left_fork);
-	pthread_mutex_lock(&right_fork);
-	eat(((t_box *)box)->philos);
+	
+	eat();
 	return NULL;
 }
 
@@ -61,32 +61,42 @@ void	print_array(int *arr, int len)
 	}
 }
 
-void	ft_start(t_box *box)
+void	ft_start(t_waiter *box)
 {
-	pthread_t t1, t2;
-	int	*philos;
+	int				i;
+	uint64_t		time;
+	struct timeval	tv;
 
-	philos = (int *)malloc(sizeof(int) * box->philos);
-	philos = fill_array(philos, box->philos);
-	print_array(philos, box->philos);
-	exit(0);
-	pthread_create(&t1, NULL, launch, (void *)philos);
-	pthread_create(&t2, NULL, launch, (void *)philos);
-
-	pthread_join(t1, NULL);
-	pthread_join(t2, NULL);
-	//free(philos);
+	i = 0;
+	gettimeofday(&tv, NULL);
+	// printf("time in sec - %ld\n", tv.tv_sec);
+	time = tv.tv_sec * 1000000;
+	// printf("time in milisec - %llu\n", time);
+	box->phil = (t_philo *)malloc(sizeof(t_philo) * box->philos);
+	box->current_time = time;
+	while (i < box->philos)
+	{
+		pthread_create(&box->phil[i].thread, NULL, launch, NULL);
+		i++;
+	}
+	i = 0;
+	while (i < box->philos)
+	{
+		pthread_join(box->phil[i].thread, NULL);
+		i++;
+	}
+	printf("Exit\n");
 }
 
 int	main(int argc, char **argv)
 {
-	t_box	*box;
+	t_waiter	*waiter;
 
     if (argc == 6)
 	{
-		box = (t_box *)malloc(sizeof(t_box));
-        check_errors(argc, argv, box);
-		ft_start(box);
+		waiter = (t_waiter *)malloc(sizeof(t_waiter));
+        check_errors(argc, argv, waiter);
+		ft_start(waiter);
     }
     return (0);
 }
