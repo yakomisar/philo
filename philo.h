@@ -27,11 +27,11 @@ typedef struct	s_waiter
 	long 			time_to_sleep;
 	int				meals;
 	long			current_time;
-	pthread_mutex_t	*mutex;
 	t_philo			*phil;
 }   t_waiter;
 
-t_waiter	*waiter;
+t_waiter		*waiter;
+pthread_mutex_t	*mutex;
 
 long int	ft_atoi(const char *str);
 int			ft_isdigit(int c);
@@ -44,7 +44,7 @@ void		*launch(void *box);
 void		*monitor(void *waiter);
 void		printf_values(t_waiter *box);
 void		init_box(int i, int value, t_waiter *box);
-void		mutex_init(t_waiter *waiter);
+void		mutex_init(pthread_mutex_t *mutex);
 void		monitor_init(t_waiter *waiter);
 void 		phil_init(t_waiter *waiter);
 void 		join_init(t_waiter *waiter);

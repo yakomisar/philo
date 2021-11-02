@@ -14,14 +14,14 @@ void	init_box(int i, int value, t_waiter *box)
 		box->meals = value;
 }
 
-void mutex_init(t_waiter *waiter)
+void mutex_init(pthread_mutex_t *mutex)
 {
 	int	i;
 
 	i = 0;
 	while (i < waiter->philos)
 	{
-		if (pthread_mutex_init(&(waiter->mutex[i]), NULL) != 0)
+		if (pthread_mutex_init(&mutex[i], NULL) != 0)
 			printf("Error: Unable to initialize mutex");
 		i++;
 	}
