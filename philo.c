@@ -1,102 +1,93 @@
 #include "philo.h"
 
-void	init_box(int i, int value, t_waiter *box)
-{
-	if (i == 1)
-		box->philos = value;
-	else if (i == 2)
-		box->time_to_die = value;
-	else if (i == 3)
-		box->time_to_eat = value;
-	else if (i == 4)
-		box->time_to_sleep = value;
-	else if (i == 5)
-		box->meals = value;	
-}
-
 void	printf_values(t_waiter *box)
 {
 	printf("philos: %d\n", box->philos);
-    printf("time to die: %d\n", box->time_to_die);
-	printf("time to eat: %d\n", box->time_to_eat);
-	printf("time to sleep: %d\n", box->time_to_sleep);
+    printf("time to die: %ld\n", box->time_to_die);
+	printf("time to eat: %ld\n", box->time_to_eat);
+	printf("time to sleep: %ld\n", box->time_to_sleep);
 	printf("meals: %d\n", box->meals);
 }
 
-void	eat()
+int	get_min(int a, int b)
 {
-	printf("Philos is thinking\n");
-	printf("Philos is eating\n");
+	if (a < b)
+		return (a);
+	return (b);
 }
 
-void	*launch()
+int	get_max(int a, int b)
 {
-	
-	eat();
-	return NULL;
+	if (a > b)
+		return (a);
+	return (b);
 }
 
-int	*fill_array(int *arr, int len)
+long	get_time()
 {
-	int	i;
-
-	i = 0;
-	while (i < len)
-	{
-		arr[i] = i;
-		i++;
-	}
-	return (arr);
-}
-
-void	print_array(int *arr, int len)
-{
-	int i;
-
-	i = 0;
-	while (i < len)
-	{	
-		printf("#%d value in arr: %d\n", i,arr[i]);
-		i++;
-	}
-}
-
-void	ft_start(t_waiter *box)
-{
-	int				i;
-	uint64_t		time;
+	long			result;
 	struct timeval	tv;
-
-	i = 0;
+	
 	gettimeofday(&tv, NULL);
-	// printf("time in sec - %ld\n", tv.tv_sec);
-	time = tv.tv_sec * 1000000;
-	// printf("time in milisec - %llu\n", time);
-	box->phil = (t_philo *)malloc(sizeof(t_philo) * box->philos);
-	box->current_time = time;
-	while (i < box->philos)
+	result = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+	return (result);
+}
+
+void	*monitor(void *waiter)
+{
+	t_waiter	*monitor;
+	
+	monitor = (t_waiter *)waiter;
+	monitor->current_time = get_time();
+	printf("Monitor time #%ld\n", monitor->current_time);
+	return (NULL);
+}
+
+void	*launch(void *phil)
+{
+	t_philo	*philosopher;
+
+	philosopher = (t_philo *)phil;
+	philosopher->latest_eat = get_time();
+	while (1)
 	{
-		pthread_create(&box->phil[i].thread, NULL, launch, NULL);
-		i++;
+		mutex();
+		mutex();
+		eat(waiter->time_to_eat);
+		mutex();
+		mutex();
+		sleeping();
+		thinking();
 	}
-	i = 0;
-	while (i < box->philos)
-	{
-		pthread_join(box->phil[i].thread, NULL);
-		i++;
-	}
+	return (NULL);
+}
+
+void	ft_start(t_waiter *waiter)
+{
+	waiter->phil = (t_philo *)malloc(sizeof(t_philo) * waiter->philos + 1);
+	waiter->mutex = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * waiter->philos);
+	monitor_init(waiter);
+	phil_init(waiter);
+	mutex_init(waiter);
+	join_init(waiter);
 	printf("Exit\n");
 }
 
 int	main(int argc, char **argv)
 {
-	t_waiter	*waiter;
-
+	if (argc == 5)
+	{
+		waiter = (t_waiter *)malloc(sizeof(t_waiter));
+		check_errors(argc, argv, waiter);
+		ft_start(waiter);
+	}
     if (argc == 6)
 	{
 		waiter = (t_waiter *)malloc(sizeof(t_waiter));
         check_errors(argc, argv, waiter);
 		ft_start(waiter);
     }
+	if (waiter)
+		free(waiter);
     return (0);
 }

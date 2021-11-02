@@ -5,7 +5,8 @@ CFLAGS = -Wall -Wextra -Werror
 RM = rm -f
 
 SRC_S		= philo.c \
-				errors.c
+				errors.c \
+				init.c
 HEADER		= philo.h
 MAKEFILE	= Makefile
 
@@ -18,7 +19,7 @@ OBJ_S = $(SRC_S:%.c=%.o)
 all:	$(TARGET)
 
 $(TARGET): $(OBJ_S)
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) -lpthread $^ -o $@
 
 clean:
 	$(RM) $(OBJ_S)
