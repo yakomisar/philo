@@ -6,21 +6,7 @@ void	printf_values(t_waiter *box)
     printf("time to die: %ld\n", box->time_to_die);
 	printf("time to eat: %ld\n", box->time_to_eat);
 	printf("time to sleep: %ld\n", box->time_to_sleep);
-	printf("meals: %d\n", box->meals);
-}
-
-int	get_min(int a, int b)
-{
-	if (a < b)
-		return (a);
-	return (b);
-}
-
-int	get_max(int a, int b)
-{
-	if (a > b)
-		return (a);
-	return (b);
+	printf("meals: %d\n", box->total_meal);
 }
 
 long	get_time()
@@ -33,71 +19,144 @@ long	get_time()
 	return (result);
 }
 
-void	*monitor(void *waiter)
+void	ft_putstr(char *s)
 {
-	t_waiter	*monitor;
+	int	i;
+
+	i = 0;
+	while (s[i] != '\0')
+	{
+		write(1, &s[i], 1);
+		i++;
+	}
+}
+
+void	ft_putchar(char c)
+{
+	write(1, &c, 1);
+}
+
+void	ft_putnbr_long(long n)
+{
+	if (n < 0)
+	{
+		n = n * -1;
+		ft_putchar('-');
+	}
+	if (n < 10)
+	{
+		ft_putchar(n + '0');
+		return ;
+	}
+	ft_putnbr_long(n / 10);
+	ft_putchar((n % 10) + '0');
+	return ;
+}
+
+void	ft_putnbr(int n)
+{
+	if (n < 0)
+	{
+		n = n * -1;
+		ft_putchar('-');
+	}
+	if (n < 10)
+	{
+		ft_putchar(n + '0');
+		return ;
+	}
+	ft_putnbr(n / 10);
+	ft_putchar((n % 10) + '0');
+	return ;
+}
+
+void	*monitor(void *x)
+{
+	int			i;
+	long		starving;
 	
-	monitor = (t_waiter *)waiter;
-	monitor->current_time = get_time();
-	printf("Monitor time #%ld\n", monitor->current_time);
+	(void)x;
+	while (1)
+	{
+		i = 0;
+		while (i < waiter->philos)
+		{
+			starving = get_time() - waiter->phil[i].latest_eat;
+			if ((starving > waiter->time_to_die) && waiter->phil[i].latest_eat != 0)
+			{
+				printf("%ld %d died\n", get_time(), waiter->phil[i].id);
+				exit(1);
+			}
+			i++;
+		}
+	}
 	return (NULL);
 }
 
-void	eating(long time)
+void	eating(t_philo *philosopher, long time)
 {
-	long	time_to_eat;
-
-	time_to_eat = time * 1000;
-	usleep(time_to_eat);
+	philosopher->latest_eat = get_time();
+	pthread_mutex_lock(&(waiter->text));
+	printf("%ld %d is eating\n", philosopher->latest_eat, philosopher->id);
+	pthread_mutex_unlock(&(waiter->text));
+	usleep(time);
+	philosopher->meal++;
 }
 
-void	sleeping(long time)
+void	sleeping(t_philo *philosopher, long time)
 {
-	long	time_to_sleep;
+	pthread_mutex_lock(&(waiter->text));
+	printf("%ld %d is sleeping\n", get_time(), philosopher->id);
+	pthread_mutex_unlock(&(waiter->text));
+	usleep(time);
+}
 
-	time_to_sleep = time * 1000;
-	usleep(time_to_sleep);
+void	thinking(t_philo *philosopher)
+{
+	pthread_mutex_lock(&(waiter->text));
+	printf("%ld %d is thinking\n", get_time(), philosopher->id);
+	pthread_mutex_unlock(&(waiter->text));
 }
 
 void	*launch(void *phil)
 {
 	t_philo	*philosopher;
-	int		amount;
 
 	philosopher = (t_philo *)phil;
 	philosopher->latest_eat = get_time();
-	amount = waiter->philos;
-	printf("amount = %d\n", amount);
 	while (1)
 	{
-		pthread_mutex_lock(&mutex[get_min(philosopher->id - 1, philosopher->id % amount)]);
-		printf("locked mutex #%d\n", get_min(philosopher->id - 1, philosopher->id % amount));
-		pthread_mutex_lock(&mutex[get_max(philosopher->id - 1, philosopher->id % amount)]);
-		printf("locked mutex #%d\n", get_max(philosopher->id - 1, philosopher->id % amount));
-		printf("#%d philosopher start eating\n", philosopher->id);
-		eating(waiter->time_to_eat);
-		pthread_mutex_unlock(&mutex[get_max(philosopher->id - 1, philosopher->id % amount)]);
-		printf("unlocked mutex #%d\n", get_max(philosopher->id - 1, philosopher->id % amount));
-		pthread_mutex_unlock(&mutex[get_min(philosopher->id - 1, philosopher->id % amount)]);
-		printf("unlocked mutex #%d\n", get_min(philosopher->id - 1, philosopher->id % amount));
-		sleep(2);
-		printf("#%d philosopher start sleeping\n", philosopher->id);
-		sleeping(waiter->time_to_sleep);
-		printf("#%d philosopher start thinking\n", philosopher->id);
+		pthread_mutex_lock(&mutex[philosopher->left_fork]);
 		
+		pthread_mutex_lock(&(waiter->text));
+		printf("%ld %d has taken a fork\n", get_time(), philosopher->id);
+		pthread_mutex_unlock(&(waiter->text));
+
+		pthread_mutex_lock(&mutex[philosopher->right_fork]);
+		
+		pthread_mutex_lock(&(waiter->text));
+		printf("%ld %d has taken a fork\n", get_time(), philosopher->id);
+		pthread_mutex_unlock(&(waiter->text));
+
+		eating(philosopher, waiter->time_to_eat);
+	
+		pthread_mutex_unlock(&mutex[philosopher->right_fork]);
+		pthread_mutex_unlock(&mutex[philosopher->left_fork]);
+		
+		sleeping(philosopher, waiter->time_to_sleep);
+		thinking(philosopher);
 	}
 	return (NULL);
-}
+} 
 
 void	ft_start(t_waiter *waiter)
 {
-	waiter->phil = (t_philo *)malloc(sizeof(t_philo) * waiter->philos + 1);
+	waiter->phil = (t_philo *)malloc(sizeof(t_philo) * waiter->philos);
 	mutex = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * waiter->philos);
-	monitor_init(waiter);
-	phil_init(waiter);
+	//monitor_init();
 	mutex_init(mutex);
+	phil_init(waiter);	
 	join_init(waiter);
-	printf("Exit\n");
 }
 
 int	main(int argc, char **argv)

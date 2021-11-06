@@ -75,5 +75,5 @@ void	check_errors(int argc, char **argv, t_waiter *box)
 		init_box(i, value, box);
 		i++;
 	}
-	printf_values(box);
+	//printf_values(box);
 }
