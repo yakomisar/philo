@@ -51,20 +51,36 @@ int	get_max(int a, int b)
 	return (b);
 }
 
-void phil_init(t_waiter *waiter)
+void phil_even_init(t_waiter *waiter)
 {
 	int	i;
 
 	i = 0;
 	while (i < waiter->philos)
 	{
-		waiter->phil[i].position = i;
 		waiter->phil[i].id = i + 1;
 		waiter->phil[i].meal = 0;
 		waiter->phil[i].left_fork = get_min(i, (i + 1) % waiter->philos);
 		waiter->phil[i].right_fork = get_max(i, (i + 1) % waiter->philos);
 		pthread_create(&(waiter->phil[i].thread), NULL, launch, (void *)&waiter->phil[i]);
-		i++;
+		i += 2;
+	}
+	usleep(5000);
+}
+
+void phil_odd_init(t_waiter *waiter)
+{
+	int	i;
+
+	i = 1;
+	while (i < waiter->philos)
+	{	
+		waiter->phil[i].id = i + 1;
+		waiter->phil[i].meal = 0;
+		waiter->phil[i].left_fork = get_min(i, (i + 1) % waiter->philos);
+		waiter->phil[i].right_fork = get_max(i, (i + 1) % waiter->philos);
+		pthread_create(&(waiter->phil[i].thread), NULL, launch, (void *)&waiter->phil[i]);
+		i += 2;
 	}
 }
 

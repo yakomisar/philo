@@ -14,7 +14,6 @@
 typedef struct	s_philo
 {
 	int			id;
-	int			position;
 	int			meal;
 	int			left_fork;
 	int			right_fork;
@@ -29,7 +28,7 @@ typedef struct	s_waiter
 	long			time_to_eat;
 	long 			time_to_sleep;
 	int				total_meal;
-	long			current_time;
+	long			start_time;
 	pthread_mutex_t	text;
 	t_philo			*phil;
 }   t_waiter;
@@ -38,6 +37,7 @@ t_waiter		*waiter;
 pthread_mutex_t	*mutex;
 
 long int	ft_atoi(const char *str);
+long		get_time();
 int			ft_isdigit(int c);
 int			ft_ischar(char *str);
 void		get_error(t_waiter *box);
@@ -50,7 +50,8 @@ void		printf_values(t_waiter *box);
 void		init_box(int i, int value, t_waiter *box);
 void		mutex_init(pthread_mutex_t *mutex);
 void		monitor_init();
-void 		phil_init(t_waiter *waiter);
+void		phil_even_init(t_waiter *waiter);
+void		phil_odd_init(t_waiter *waiter);
 void 		join_init(t_waiter *waiter);
 
 #endif

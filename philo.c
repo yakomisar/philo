@@ -97,7 +97,7 @@ void	eating(t_philo *philosopher, long time)
 {
 	philosopher->latest_eat = get_time();
 	pthread_mutex_lock(&(waiter->text));
-	printf("%ld %d is eating\n", philosopher->latest_eat, philosopher->id);
+	printf("%ld %d is eating\n", get_time() - waiter->start_time, philosopher->id);
 	pthread_mutex_unlock(&(waiter->text));
 	usleep(time);
 	philosopher->meal++;
@@ -106,7 +106,7 @@ void	eating(t_philo *philosopher, long time)
 void	sleeping(t_philo *philosopher, long time)
 {
 	pthread_mutex_lock(&(waiter->text));
-	printf("%ld %d is sleeping\n", get_time(), philosopher->id);
+	printf("%ld %d is sleeping\n", get_time() - waiter->start_time, philosopher->id);
 	pthread_mutex_unlock(&(waiter->text));
 	usleep(time);
 }
@@ -114,8 +114,9 @@ void	sleeping(t_philo *philosopher, long time)
 void	thinking(t_philo *philosopher)
 {
 	pthread_mutex_lock(&(waiter->text));
-	printf("%ld %d is thinking\n", get_time(), philosopher->id);
+	printf("%ld %d is thinking\n", get_time() - waiter->start_time, philosopher->id);
 	pthread_mutex_unlock(&(waiter->text));
+	usleep(1000);
 }
 
 void	*launch(void *phil)
@@ -123,19 +124,19 @@ void	*launch(void *phil)
 	t_philo	*philosopher;
 
 	philosopher = (t_philo *)phil;
-	philosopher->latest_eat = get_time();
+	//philosopher->latest_eat = get_time();
 	while (1)
 	{
 		pthread_mutex_lock(&mutex[philosopher->left_fork]);
 		
 		pthread_mutex_lock(&(waiter->text));
-		printf("%ld %d has taken a fork\n", get_time(), philosopher->id);
+		printf("%ld %d has taken a fork\n", get_time() - waiter->start_time, philosopher->id);
 		pthread_mutex_unlock(&(waiter->text));
 
 		pthread_mutex_lock(&mutex[philosopher->right_fork]);
 		
 		pthread_mutex_lock(&(waiter->text));
-		printf("%ld %d has taken a fork\n", get_time(), philosopher->id);
+		printf("%ld %d has taken a fork\n", get_time() - waiter->start_time, philosopher->id);
 		pthread_mutex_unlock(&(waiter->text));
 
 		eating(philosopher, waiter->time_to_eat);
@@ -153,9 +154,11 @@ void	ft_start(t_waiter *waiter)
 {
 	waiter->phil = (t_philo *)malloc(sizeof(t_philo) * waiter->philos);
 	mutex = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * waiter->philos);
-	//monitor_init();
 	mutex_init(mutex);
-	phil_init(waiter);	
+	waiter->start_time = get_time();
+	phil_even_init(waiter);
+	phil_odd_init(waiter);
+	//monitor_init();
 	join_init(waiter);
 }
 
