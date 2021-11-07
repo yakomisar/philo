@@ -70,23 +70,34 @@ void	ft_putnbr(int n)
 	return ;
 }
 
-void	*monitor(void *x)
+void	*monitor()
 {
 	int			i;
 	long		starving;
 	
-	(void)x;
 	while (1)
 	{
 		i = 0;
 		while (i < waiter->philos)
 		{
 			starving = get_time() - waiter->phil[i].latest_eat;
-			if ((starving > waiter->time_to_die) && waiter->phil[i].latest_eat != 0)
+			// printf("starving time: %ld\n", starving);
+			// printf("time to die: %ld\n", waiter->time_to_die);
+			if	((starving > waiter->time_to_die) && waiter->phil[i].latest_eat != 0)
 			{
-				printf("%ld %d died\n", get_time(), waiter->phil[i].id);
+				pthread_mutex_lock(&(waiter->text));
+				printf("%ld %d died\n", get_time() - waiter->start_time, waiter->phil[i].id);
+				pthread_mutex_unlock(&(waiter->text));
 				exit(1);
 			}
+			// if ((starving > waiter->time_to_die) && waiter->phil[i].latest_eat != 0)
+			// {
+				
+			// 	pthread_mutex_lock(&(waiter->text));
+			// 	printf("%ld %d died\n", get_time() - waiter->start_time, waiter->phil[i].id);
+			// 	pthread_mutex_unlock(&(waiter->text));
+			// 	exit(1);
+			// }
 			i++;
 		}
 	}
@@ -124,7 +135,6 @@ void	*launch(void *phil)
 	t_philo	*philosopher;
 
 	philosopher = (t_philo *)phil;
-	//philosopher->latest_eat = get_time();
 	while (1)
 	{
 		pthread_mutex_lock(&mutex[philosopher->left_fork]);
@@ -158,7 +168,7 @@ void	ft_start(t_waiter *waiter)
 	waiter->start_time = get_time();
 	phil_even_init(waiter);
 	phil_odd_init(waiter);
-	//monitor_init();
+	monitor_init();
 	join_init(waiter);
 }
 

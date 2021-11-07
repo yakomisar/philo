@@ -45,7 +45,7 @@ void		check_errors(int argc, char **argv, t_waiter *box);
 void		ft_start(t_waiter *box);
 void		print_array(int *arr, int len);
 void		*launch(void *box);
-void		*monitor(void *x);
+void		*monitor();
 void		printf_values(t_waiter *box);
 void		init_box(int i, int value, t_waiter *box);
 void		mutex_init(pthread_mutex_t *mutex);

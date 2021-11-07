@@ -5,7 +5,7 @@ void	init_box(int i, int value, t_waiter *box)
 	if (i == 1)
 		box->philos = value;
 	else if (i == 2)
-		box->time_to_die = value * 1000;
+		box->time_to_die = value;
 	else if (i == 3)
 		box->time_to_eat = value * 1000;
 	else if (i == 4)
@@ -31,9 +31,9 @@ void mutex_init(pthread_mutex_t *mutex)
 void	monitor_init()
 {
 	pthread_t	my_waiter;
-	int			i;
+	//int			i;
 
-	pthread_create(&my_waiter, NULL, monitor, (void *)&i);
+	pthread_create(&my_waiter, NULL, monitor, 0);
 	pthread_detach(my_waiter);
 }
 
@@ -62,6 +62,7 @@ void phil_even_init(t_waiter *waiter)
 		waiter->phil[i].meal = 0;
 		waiter->phil[i].left_fork = get_min(i, (i + 1) % waiter->philos);
 		waiter->phil[i].right_fork = get_max(i, (i + 1) % waiter->philos);
+		waiter->phil[i].latest_eat = get_time();
 		pthread_create(&(waiter->phil[i].thread), NULL, launch, (void *)&waiter->phil[i]);
 		i += 2;
 	}
@@ -79,6 +80,7 @@ void phil_odd_init(t_waiter *waiter)
 		waiter->phil[i].meal = 0;
 		waiter->phil[i].left_fork = get_min(i, (i + 1) % waiter->philos);
 		waiter->phil[i].right_fork = get_max(i, (i + 1) % waiter->philos);
+		waiter->phil[i].latest_eat = get_time();
 		pthread_create(&(waiter->phil[i].thread), NULL, launch, (void *)&waiter->phil[i]);
 		i += 2;
 	}
