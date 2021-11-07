@@ -81,8 +81,6 @@ void	*monitor()
 		while (i < waiter->philos)
 		{
 			starving = get_time() - waiter->phil[i].latest_eat;
-			// printf("starving time: %ld\n", starving);
-			// printf("time to die: %ld\n", waiter->time_to_die);
 			if	((starving > waiter->time_to_die) && waiter->phil[i].latest_eat != 0)
 			{
 				pthread_mutex_lock(&(waiter->text));
@@ -90,14 +88,6 @@ void	*monitor()
 				pthread_mutex_unlock(&(waiter->text));
 				exit(1);
 			}
-			// if ((starving > waiter->time_to_die) && waiter->phil[i].latest_eat != 0)
-			// {
-				
-			// 	pthread_mutex_lock(&(waiter->text));
-			// 	printf("%ld %d died\n", get_time() - waiter->start_time, waiter->phil[i].id);
-			// 	pthread_mutex_unlock(&(waiter->text));
-			// 	exit(1);
-			// }
 			i++;
 		}
 	}
@@ -106,11 +96,12 @@ void	*monitor()
 
 void	eating(t_philo *philosopher, long time)
 {
-	philosopher->latest_eat = get_time();
 	pthread_mutex_lock(&(waiter->text));
 	printf("%ld %d is eating\n", get_time() - waiter->start_time, philosopher->id);
 	pthread_mutex_unlock(&(waiter->text));
+	//philosopher->latest_eat = get_time();
 	usleep(time);
+	philosopher->latest_eat = get_time();
 	philosopher->meal++;
 }
 
