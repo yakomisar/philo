@@ -31,7 +31,6 @@ void mutex_init(pthread_mutex_t *mutex)
 void	monitor_init()
 {
 	pthread_t	my_waiter;
-	//int			i;
 
 	pthread_create(&my_waiter, NULL, monitor, 0);
 	pthread_detach(my_waiter);
@@ -62,8 +61,12 @@ void phil_even_init(t_waiter *waiter)
 		waiter->phil[i].meal = 0;
 		waiter->phil[i].left_fork = get_min(i, (i + 1) % waiter->philos);
 		waiter->phil[i].right_fork = get_max(i, (i + 1) % waiter->philos);
-		waiter->phil[i].latest_eat = get_time();
-		pthread_create(&(waiter->phil[i].thread), NULL, launch, (void *)&waiter->phil[i]);
+		waiter->phil[i].latest_eat = 0;
+		waiter->phil[i].priority = 0;
+		if (waiter->is_meal)
+			pthread_create(&(waiter->phil[i].thread), NULL, launch_meal, (void *)&waiter->phil[i]);
+		else
+			pthread_create(&(waiter->phil[i].thread), NULL, launch, (void *)&waiter->phil[i]);
 		i += 2;
 	}
 	usleep(5000);
@@ -80,8 +83,12 @@ void phil_odd_init(t_waiter *waiter)
 		waiter->phil[i].meal = 0;
 		waiter->phil[i].left_fork = get_min(i, (i + 1) % waiter->philos);
 		waiter->phil[i].right_fork = get_max(i, (i + 1) % waiter->philos);
-		waiter->phil[i].latest_eat = get_time();
-		pthread_create(&(waiter->phil[i].thread), NULL, launch, (void *)&waiter->phil[i]);
+		waiter->phil[i].latest_eat = 0;
+		waiter->phil[i].priority = 0;
+		if (waiter->is_meal)
+			pthread_create(&(waiter->phil[i].thread), NULL, launch_meal, (void *)&waiter->phil[i]);
+		else
+			pthread_create(&(waiter->phil[i].thread), NULL, launch, (void *)&waiter->phil[i]);
 		i += 2;
 	}
 }

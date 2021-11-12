@@ -17,8 +17,9 @@ typedef struct	s_philo
 	int			meal;
 	int			left_fork;
 	int			right_fork;
-	pthread_t	thread;
+	int			priority;
 	long		latest_eat;
+	pthread_t	thread;
 }	t_philo;
 
 typedef struct	s_waiter
@@ -27,8 +28,11 @@ typedef struct	s_waiter
     long 			time_to_die;
 	long			time_to_eat;
 	long 			time_to_sleep;
+	int				is_meal;
 	int				total_meal;
+	int				consumed;
 	long			start_time;
+	int				is_died;
 	pthread_mutex_t	text;
 	t_philo			*phil;
 }   t_waiter;
@@ -45,8 +49,8 @@ void		check_errors(int argc, char **argv, t_waiter *box);
 void		ft_start(t_waiter *box);
 void		print_array(int *arr, int len);
 void		*launch(void *box);
+void		*launch_meal(void *phil);
 void		*monitor();
-void		printf_values(t_waiter *box);
 void		init_box(int i, int value, t_waiter *box);
 void		mutex_init(pthread_mutex_t *mutex);
 void		monitor_init();
