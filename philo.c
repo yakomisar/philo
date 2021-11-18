@@ -103,41 +103,47 @@ void	my_usleep(long value)
 void	eating(t_philo *philosopher, long time)
 {
 	philosopher->latest_eat = get_time();
+	philosopher->state = 1;
 	pthread_mutex_lock(&(waiter->text));
 	printf("%ld %d is eating\n", get_time() - waiter->start_time, philosopher->id);
-	waiter->phil[philosopher->left_fork].priority = 0;
-	waiter->phil[philosopher->right_fork].priority = 0;
 	pthread_mutex_unlock(&(waiter->text));
 	my_usleep(time);
-	philosopher->priority = 1;
 	philosopher->meal++;
 	waiter->consumed++;
 }
 
 void	sleeping(t_philo *philosopher, long time)
 {
+	philosopher->state = 0;
 	pthread_mutex_lock(&(waiter->text));
 	printf("%ld %d is sleeping\n", get_time() - waiter->start_time, philosopher->id);
 	pthread_mutex_unlock(&(waiter->text));
 	my_usleep(time);
 }
 
-void	thinking(t_philo *philosopher)
+int	ask_waiter(int n)
 {
-	pthread_mutex_lock(&(waiter->text));
-	printf("%ld %d is thinking\n", get_time() - waiter->start_time, philosopher->id);
-	pthread_mutex_unlock(&(waiter->text));
-}
+	int		left;
+	int		right;
+	long	left_last_meal;
+	long	right_last_meal;
 
-int	check_priority(t_philo *ph)
-{
-	int	left_priority;
-	int	right_priority;
-
-	left_priority = waiter->phil[ph->left_fork].priority;
-	right_priority = waiter->phil[ph->right_fork].priority;
-	if (ph->priority <= left_priority && ph->priority <= right_priority)
+	left = (n - 1 + waiter->philos) % waiter->philos;
+	right = (n + 1) % waiter->philos;
+	// printf("left is %d\n", left);
+	// printf("middle is %d\n", n);
+	// printf("right is %d\n", right);
+	left_last_meal = waiter->phil[left].latest_eat;
+	// printf("ph#%d last meal at %ld for neighbor of %d\n", left, left_last_meal, n);
+	right_last_meal = waiter->phil[right].latest_eat;
+	// printf("ph#%d last meal is %ld\n", n+1, waiter->phil[n].latest_eat);
+	// printf("ph#%d last meal at %ld for neighbor of %d\n",right, right_last_meal, n);
+	if ((waiter->phil[n].latest_eat <= left_last_meal) && (waiter->phil[n].latest_eat <= right_last_meal))
+	{
+		// printf("%d can eat\n", waiter->phil[n].id);
 		return (1);
+	}
+	// printf("%d CANNOT eat\n", waiter->phil[n].id);
 	return (0);
 }
 
@@ -149,18 +155,22 @@ void	*launch(void *phil)
 	while (1)
 	{
 		pthread_mutex_lock(&mutex[philosopher->left_fork]);
-		pthread_mutex_lock(&(waiter->text));
 		printf("%ld %d has taken a fork\n", get_time() - waiter->start_time, philosopher->id);
-		pthread_mutex_unlock(&(waiter->text));
 		pthread_mutex_lock(&mutex[philosopher->right_fork]);
-		pthread_mutex_lock(&(waiter->text));
 		printf("%ld %d has taken a fork\n", get_time() - waiter->start_time, philosopher->id);
-		pthread_mutex_unlock(&(waiter->text));
-		eating(philosopher, waiter->time_to_eat);
+		// printf("%d - position is checking\n", philosopher->id);
+		if (waiter->answer(philosopher->id - 1))
+		{
+			eating(philosopher, waiter->time_to_eat);
+		}
 		pthread_mutex_unlock(&mutex[philosopher->right_fork]);
 		pthread_mutex_unlock(&mutex[philosopher->left_fork]);
-		sleeping(philosopher, waiter->time_to_sleep);
-		printf("%ld %d is thinking\n", get_time() - waiter->start_time, philosopher->id);
+		if (philosopher->state == 1)
+		{
+			sleeping(philosopher, waiter->time_to_sleep);
+			printf("%ld %d is thinking\n", get_time() - waiter->start_time, philosopher->id);
+		}
+		my_usleep(1000);
 	}
 	return (NULL);
 }
@@ -219,6 +229,7 @@ int	main(int argc, char **argv)
 	waiter = (t_waiter *)malloc(sizeof(t_waiter));
 	waiter->start_time = get_time();
 	waiter->is_died = 0;
+	waiter->answer = ask_waiter;
 	if (argc == 5)
 	{
 		check_errors(argc, argv, waiter);

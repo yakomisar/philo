@@ -57,12 +57,13 @@ void phil_even_init(t_waiter *waiter)
 	i = 0;
 	while (i < waiter->philos)
 	{
+		waiter->phil[i].position = i;
 		waiter->phil[i].id = i + 1;
 		waiter->phil[i].meal = 0;
 		waiter->phil[i].left_fork = get_min(i, (i + 1) % waiter->philos);
 		waiter->phil[i].right_fork = get_max(i, (i + 1) % waiter->philos);
 		waiter->phil[i].latest_eat = 0;
-		waiter->phil[i].priority = 0;
+		waiter->phil[i].state = 0;
 		if (waiter->is_meal)
 			pthread_create(&(waiter->phil[i].thread), NULL, launch_meal, (void *)&waiter->phil[i]);
 		else
@@ -84,7 +85,7 @@ void phil_odd_init(t_waiter *waiter)
 		waiter->phil[i].left_fork = get_min(i, (i + 1) % waiter->philos);
 		waiter->phil[i].right_fork = get_max(i, (i + 1) % waiter->philos);
 		waiter->phil[i].latest_eat = 0;
-		waiter->phil[i].priority = 0;
+		waiter->phil[i].state = 0;
 		if (waiter->is_meal)
 			pthread_create(&(waiter->phil[i].thread), NULL, launch_meal, (void *)&waiter->phil[i]);
 		else

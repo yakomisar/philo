@@ -13,13 +13,15 @@
 
 typedef struct	s_philo
 {
-	int			id;
-	int			meal;
-	int			left_fork;
-	int			right_fork;
-	int			priority;
-	long		latest_eat;
-	pthread_t	thread;
+	int				position;
+	int				id;
+	int				meal;
+	int				left_fork;
+	int				right_fork;
+	int				state;
+	long			latest_eat;
+	pthread_mutex_t	main_fork;
+	pthread_t		thread;
 }	t_philo;
 
 typedef struct	s_waiter
@@ -33,6 +35,7 @@ typedef struct	s_waiter
 	int				consumed;
 	long			start_time;
 	int				is_died;
+	int				(*answer)(int a);
 	pthread_mutex_t	text;
 	t_philo			*phil;
 }   t_waiter;
