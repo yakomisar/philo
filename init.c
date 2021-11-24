@@ -14,25 +14,25 @@ void	init_box(int i, int value, t_waiter *box)
 		box->total_meal = value;
 }
 
-void mutex_init(pthread_mutex_t *mutex)
+void mutex_init(t_waiter *waiter)
 {
 	int	i;
 
 	i = 0;
 	while (i < waiter->philos)
 	{
-		if (pthread_mutex_init(&mutex[i], NULL) != 0)
+		if (pthread_mutex_init(&(waiter->fork[i]), NULL) != 0)
 			printf("Error: Unable to initialize mutex");
 		i++;
 	}
 	pthread_mutex_init(&(waiter->text), NULL);
 }
 
-void	monitor_init()
+void	monitor_init(t_waiter *waiter)
 {
 	pthread_t	my_waiter;
 
-	pthread_create(&my_waiter, NULL, monitor, 0);
+	pthread_create(&my_waiter, NULL, monitor, (void *)waiter);
 	pthread_detach(my_waiter);
 }
 
@@ -57,20 +57,20 @@ void phil_even_init(t_waiter *waiter)
 	i = 0;
 	while (i < waiter->philos)
 	{
-		waiter->phil[i].position = i;
 		waiter->phil[i].id = i + 1;
 		waiter->phil[i].meal = 0;
 		waiter->phil[i].left_fork = get_min(i, (i + 1) % waiter->philos);
 		waiter->phil[i].right_fork = get_max(i, (i + 1) % waiter->philos);
 		waiter->phil[i].latest_eat = 0;
 		waiter->phil[i].state = 0;
+		waiter->phil[i].waiter = waiter;
 		if (waiter->is_meal)
 			pthread_create(&(waiter->phil[i].thread), NULL, launch_meal, (void *)&waiter->phil[i]);
 		else
 			pthread_create(&(waiter->phil[i].thread), NULL, launch, (void *)&waiter->phil[i]);
 		i += 2;
 	}
-	usleep(5000);
+	usleep(2000);
 }
 
 void phil_odd_init(t_waiter *waiter)
@@ -86,6 +86,7 @@ void phil_odd_init(t_waiter *waiter)
 		waiter->phil[i].right_fork = get_max(i, (i + 1) % waiter->philos);
 		waiter->phil[i].latest_eat = 0;
 		waiter->phil[i].state = 0;
+		waiter->phil[i].waiter = waiter;
 		if (waiter->is_meal)
 			pthread_create(&(waiter->phil[i].thread), NULL, launch_meal, (void *)&waiter->phil[i]);
 		else
