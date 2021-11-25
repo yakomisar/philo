@@ -7,12 +7,12 @@ void	stop_and_exit(t_waiter *waiter)
 	i = 0;
 	while (i < waiter->philos)
 	{
-		//free(&(waiter->phil[i]));
 		pthread_mutex_destroy(&(waiter->fork[i]));	
-		//free(&(waiter->fork[i]));
 		i++;
 	}
 	pthread_mutex_destroy(&(waiter->text));
+	free(waiter->phil);
+	free(waiter->mutex);
 }
 
 long	get_time()
@@ -208,9 +208,6 @@ void	check_one(t_waiter *waiter)
 {
 	my_usleep(waiter->time_to_die * 1000);
 	printf("%ld 1 died\n", get_time() - waiter->start_time);
-	if (waiter)
-		free(waiter);
-	exit(1);
 }
 
 int	main(int argc, char **argv)
