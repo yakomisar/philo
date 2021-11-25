@@ -1,5 +1,26 @@
 #include "philo.h"
 
+long	get_time()
+{
+	long			result;
+	struct timeval	tv;
+	
+	gettimeofday(&tv, NULL);
+	result = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+	return (result);
+}
+
+void	my_usleep(long value)
+{
+	long	check;
+	long	stop;
+
+	check = get_time();
+	stop = value / 1000;
+	while ((get_time() - check) < stop)
+		usleep(1000);
+}
+
 void	stop_and_exit(t_waiter *waiter)
 {
 	int	i;
@@ -12,17 +33,7 @@ void	stop_and_exit(t_waiter *waiter)
 	}
 	pthread_mutex_destroy(&(waiter->text));
 	free(waiter->phil);
-	free(waiter->mutex);
-}
-
-long	get_time()
-{
-	long			result;
-	struct timeval	tv;
-	
-	gettimeofday(&tv, NULL);
-	result = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
-	return (result);
+	free(waiter->fork);
 }
 
 void	kill(t_philo *ph)
@@ -38,6 +49,7 @@ void	stop_simulation(t_philo *ph)
 	pthread_mutex_lock(&(ph->waiter->text));
 	ph->waiter->is_died = 1;
 	pthread_mutex_unlock(&(ph->waiter->text));
+	printf("%ld Simulation has been stopped\n", get_time() - ph->waiter->start_time);
 }
 
 void	*monitor(void *value)
@@ -67,17 +79,6 @@ void	*monitor(void *value)
 		}
 	}
 	return (NULL);
-}
-
-void	my_usleep(long value)
-{
-	long	check;
-	long	stop;
-
-	check = get_time();
-	stop = value / 1000;
-	while ((get_time() - check) < stop)
-		usleep(1000);
 }
 
 void	eating(t_philo *philosopher, long time)
