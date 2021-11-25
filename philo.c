@@ -222,19 +222,25 @@ int	main(int argc, char **argv)
 		check_errors(argc, argv, waiter);
 		if (waiter->philos == 1)
 			check_one(waiter);
-		waiter->is_meal = 0;
-		ft_start(waiter);
-		stop_and_exit(waiter);
+		else
+		{
+			waiter->is_meal = 0;
+			ft_start(waiter);
+			stop_and_exit(waiter);
+		}
 	}
     if (argc == 6)
 	{
         check_errors(argc, argv, waiter);
 		if (waiter->philos == 1)
 			check_one(waiter);
-		waiter->is_meal = 1;
-		waiter->consumed = 0;
-		ft_start(waiter);
-		stop_and_exit(waiter);
+		else
+		{
+			waiter->is_meal = 1;
+			waiter->consumed = 0;
+			ft_start(waiter);
+			stop_and_exit(waiter);
+		}
     }
 	free(waiter);
     return (0);
